@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="core.js"></script>
+    <script src="codemirror/codemirror.min.js"></script>
+    <style>
+        .editor{display:flex;}
+        .editor>span{flex:1;padding:5px;
+        background:#444;}
+        .editor label{
+            display:inline-block;
+            background:rgb(31, 31, 31);
+            padding:4px;
+            color:white;
+            font-family: arial;
+            border-bottom: solid 1px #00aaaa;
+        }
+        #preview{
+            height:40vh;
+        }
+    </style>
+</head>
+
+<body>
+    <section class="editor">
+        <span>
+            <label>HTML</label>
+<!--  -->
+<textarea id="HTML">
+<body>
+    <link rel="stylesheet" href="style.css">
+<div id="root">
+sfdsf
+</div>
+<script src="script.js"></script>
+</body>
+</textarea>
+<!--  -->
+        </span>
+        <span>
+            <label>Javascript</label>
+<!--  -->
+<textarea id="SCRIPT">
+document.getElementById('root').style.background='red'
+</textarea>
+<!--  -->
+        </span>
+        <span>
+            <label>stylesheet</label>
+<!--  -->
+<textarea id="STYLE">
+body{
+    margin:0px;
+}
+</textarea>
+<!--  -->
+        </span>
+    </section>
+    <iframe id=preview></iframe>
+    <script>
+
+var delay;
+var editors = {
+    html: CodeMirror.fromTextArea(id('HTML'), {
+        mode: 'text/html',
+        theme: 'vscode-dark'
+    }),
+    js:CodeMirror.fromTextArea(id('SCRIPT'), {
+        mode: 'text/javascript',
+        theme: 'vscode-dark'
+    }),
+    css:CodeMirror.fromTextArea(id('STYLE'), {
+        mode: 'text/javascript',
+        theme: 'vscode-dark'
+    })
+}
+var text = {}
+editors.html.on('change',()=>{processDoc()})
+editors.js.on('change',()=>{processDoc()})
+function processDoc(){
+    text.html=editors.html.getValue();
+        var jsBlob = new Blob([editors.js.getValue()],{type : "text/javascript;charset=utf-8"});
+        var cssBlob = new Blob([editors.css.getValue()],{type : "text/javascript;charset=utf-8"});
+        var textURL={
+            js:URL.createObjectURL( jsBlob ),
+            css:URL.createObjectURL( cssBlob )
+        }
+        var page = editors.html.getValue().replaceAll(`<link rel="stylesheet" href="style.css">`,`<link rel="stylesheet" href="${textURL.css}">`).replaceAll(`<script src="script.js">`,`<script src="${textURL.js}">`)
+        updateIframe(page)
+}
+    function updateIframe(doc) {
+        var previewFrame = id('preview');
+        var preview = previewFrame.contentDocument || previewFrame.contentWindow.document;
+        
+        preview.open()
+        preview.write(doc)
+        preview.close()
+    };
+    processDoc()
+
+
+    </script>
+
+</body>
+
+</html>
